@@ -33,6 +33,7 @@ This file records the decisions that the build prompt did not fix. Each entry gi
 - **Planning roads.** The first-stage LP uses one sampled set of blocked edges for each scenario and the debris schedule of that set (a sample-average approximation). The test with a threshold of p_blocked >= 0.5 gave staging that was too optimistic.
 - **Orlando depot.** The state depot in Orlando enters the road graph at the I-75 N exit with 3.5 h of extra travel time.
 - **SAR tasks.** A task holds 2 to 8 persons. If a sample has more than 400 tasks, the pipeline merges tasks and keeps the total of persons. Each helicopter flies sorties of one endurance, with 1 h on the ground between sorties.
+- **SAR start in a cell.** A rescue task starts at landfall + 6 h, or 1 h after the last hurricane-force wind in its cell, if that is later. The prompt uses the end of the 34-kt wind. The wind model does not reduce the wind over land, so the 34-kt wind stays for 34 h to 47 h over the county. With that rule, rescue work started only near the end of the clock.
 - **SAR travel times.** Boats travel in straight lines with a detour factor of 1.3. Helicopters travel on great circles. High-water trucks use the road graph at 40 km/h, with the edges that are closed 12 h after the start of SAR.
 
 ## Data and UI

@@ -93,6 +93,7 @@ class WindField:
     t_ts_arrival: np.ndarray  # hour index from T0, NaN if never
     t_peak: np.ndarray  # hour index of the peak wind
     hourly_max_kt: np.ndarray  # (H,) maximum sustained wind over the county at each hour
+    t_last_64: np.ndarray  # (ny, nx) last hour with hurricane-force wind, NaN if never
 
 
 def wind_field(track_lat: np.ndarray, track_lon: np.ndarray, track_v: np.ndarray,
@@ -104,6 +105,7 @@ def wind_field(track_lat: np.ndarray, track_lon: np.ndarray, track_v: np.ndarray
     h64 = np.zeros(yy.shape)
     t_ts = np.full(yy.shape, np.nan)
     t_peak = np.zeros(yy.shape)
+    t_last64 = np.full(yy.shape, np.nan)
     hourly = np.zeros(len(track_lat))
     spd, hdg = forward_motion(track_lat, track_lon)
     clat, clon = float(grid_lat.mean()), float(grid_lon.mean())
@@ -120,7 +122,8 @@ def wind_field(track_lat: np.ndarray, track_lon: np.ndarray, track_v: np.ndarray
         h34 += v >= 34
         h64 += v >= 64
         t_ts = np.where(np.isnan(t_ts) & (v >= 34), h, t_ts)
-    return WindField(peak * GUST_FACTOR, h34, h64, t_ts, t_peak, hourly)
+        t_last64 = np.where(v >= 64, h, t_last64)
+    return WindField(peak * GUST_FACTOR, h34, h64, t_ts, t_peak, hourly, t_last64)
 
 
 def rings(track_lat: np.ndarray, track_lon: np.ndarray, track_v: np.ndarray,

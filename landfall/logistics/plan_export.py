@@ -129,7 +129,7 @@ def scenario_plan(ctx: Any, imp: Any, plan: str, res: Any, bs: Any, blocked_h: n
     sar_tasks = [{
         "id": t.id, "lon": t.lon, "lat": t.lat, "persons": int(t.persons), "priority": int(t.priority),
         "asset_type": t.asset_type, "on_barrier_island": t.island is not None, "island": t.island,
-        "created_t": _t(t.created_h), "served_t": _t(t.served_h) if t.served_h is not None else None,
+        "created_t": _t(t.created_h), "served_t": iso(hour_to_time(t.served_h)) if t.served_h is not None else None,
         "asset_id": t.asset_id, "hospital_id": t.hospital_id,
     } for t in tasks]
     sar_assets = []

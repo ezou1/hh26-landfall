@@ -348,7 +348,8 @@ def run_stage2(adv: datetime, s1: Stage1Result, st: Static, hospitals: pd.DataFr
             lf_h = C.time_to_hour(datetime.fromisoformat(sc["landfall_time"].replace("Z", "+00:00")))
         else:
             lf_h = float(np.argmax(wf.hourly_max_kt)) if wf.hourly_max_kt.max() > 0 else C.time_to_hour(adv) + 48
-        t_clear = np.where(np.isfinite(wf.t_ts_arrival), wf.t_ts_arrival + wf.hours_34, lf_h)
+        # Rescue work starts when the hurricane-force wind ends in the cell (see docs/DECISIONS.md).
+        t_clear = np.where(np.isfinite(wf.t_last_64), wf.t_last_64 + 1.0, lf_h)
 
         def site_val(field: np.ndarray, la: float, lo: float) -> float:
             return surge.sample_point(st.grid, field, la, lo, radius_cells=0)

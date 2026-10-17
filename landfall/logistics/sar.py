@@ -214,7 +214,7 @@ def route_class(kind: str, tasks: list[Task], assets: list[dict[str, object]], s
     tm = np.minimum(tm, 10**6)
     starts = [veh_assets[v] for v in range(len(veh_assets))]
     task_nodes = list(range(nb, nb + n_tasks))
-    tw = [(max(0, int((t.created_h - t0) * 60)), horizon_min) for t in tasks]
+    tw = [(max(0, int(np.ceil((t.created_h - t0) * 60))), horizon_min) for t in tasks]
     service = []
     for i in range(n_tasks):
         s = SAR_SERVICE_MIN[kind]
