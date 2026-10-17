@@ -1,5 +1,5 @@
-project: landfall
+project: Default
 environments:
   default:
     runtime: python312
-    requirements: ../pyproject.toml
+    requirements: requirements.txt

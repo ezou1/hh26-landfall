@@ -72,6 +72,11 @@ def get_client(mode: str = CHALK_MODE) -> Any:
     return chalk_module("local_runtime").LocalChalkClient()
 
 
+def state_id(storm_id: str, fix_source: str, t: datetime) -> str:
+    """Return the StormState primary key: storm id, fix source, and time."""
+    return f"{storm_id}:{fix_source}:{pd.Timestamp(t).isoformat()}"
+
+
 def _strip(df: pd.DataFrame) -> pd.DataFrame:
     return df.rename(columns={c: str(c).split(".")[-1] for c in df.columns})
 
@@ -90,13 +95,22 @@ def storm_state_frame(
     if mode == "remote" and not hasattr(client, "resolve_row"):
         try:
             fx = chalk_module("features")
+            ids = [state_id(s, f, t) for s, f, t in zip(storm_ids, src, times, strict=True)]
             ds = client.offline_query(
-                input={fx.StormState.storm_id: storm_ids, fx.StormState.fix_source: src},
+                input={fx.StormState.id: ids, fx.StormState.storm_id: storm_ids, fx.StormState.fix_source: src},
                 input_times=list(times),
-                output=[getattr(fx.StormState, c) for c in outputs],
+                output=[fx.StormState.id] + [getattr(fx.StormState, c) for c in outputs],
                 recompute_features=True,
             )
-            return _strip(ds.get_data_as_pandas())
+            out = _strip(ds.get_data_as_pandas())
+            # Put back the input columns, in the input order, through the primary key.
+            keys = pd.DataFrame({"id": ids, "storm_id": storm_ids, "fix_source": src,
+                                 "time": pd.to_datetime(list(times), utc=True)})
+            out = keys.merge(out.drop(columns=[c for c in ("storm_id", "fix_source", "time") if c in out]),
+                             on="id", how="left")
+            if out[outputs[0]].isna().all():
+                raise RuntimeError("offline query returned no feature values")
+            return out
         except Exception as exc:  # noqa: BLE001
             record_fallback("chalk_remote", f"offline_query failed; local runtime used: {exc}")
             client = get_client("local")
@@ -116,10 +130,13 @@ def online_state(storm_id: str, now: datetime, fix_source: str = "carq", mode: s
         try:
             fx = chalk_module("features")
             res = client.query(
-                input={fx.StormState.storm_id: storm_id, fx.StormState.fix_source: fix_source},
+                input={fx.StormState.id: state_id(storm_id, fix_source, now),
+                       fx.StormState.storm_id: storm_id, fx.StormState.fix_source: fix_source},
                 output=[getattr(fx.StormState, c) for c in outputs],
                 now=now,
             )
+            if res.errors:
+                raise RuntimeError("; ".join(str(getattr(e, "message", e)) for e in res.errors))
             return {str(k).split(".")[-1]: v for k, v in res.to_dict().items()}
         except Exception as exc:  # noqa: BLE001
             record_fallback("chalk_remote", f"online query failed; local runtime used: {exc}")

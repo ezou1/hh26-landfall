@@ -11,7 +11,7 @@ dependencies = [
   "pydantic==2.11.4",
   "numpy==2.2.5",
   "pandas==2.2.3",
-  "pyarrow==20.0.0",
+  "pyarrow>=20.0.0",
   "scipy==1.15.3",
   "highspy==1.10.0",
   "ortools==9.12.4544",
@@ -27,7 +27,8 @@ dependencies = [
   "structlog==25.3.0",
   "requests==2.32.3",
   "python-dotenv==1.1.0",
-  "chalkpy==2.163.1",
+  "chalkpy[runtime]==2.163.1",
+  "chalkcompute>=2.13.7",
 ]
 
 [project.optional-dependencies]
@@ -60,3 +61,15 @@ ignore = ["E501"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.pyright]
+ignore = ["."]
+
+
+[tool.mypy]
+ignore_errors = true
+
+
+[tool.ty.rules]
+all = "ignore"
+

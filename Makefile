@@ -17,7 +17,7 @@ PY := PYTHONPATH=$(CURDIR) $(CURDIR)/.venv/bin/python
 # Load nvm if node is not on the PATH (a Windows npm on the WSL PATH does not count).
 NODE_SETUP := if ! command -v node >/dev/null 2>&1 && [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" >/dev/null; fi;
 
-.PHONY: help install install-py install-web data train precompute serve demo check test lint ste clean clean-all open
+.PHONY: chalk-apply help install install-py install-web data train precompute serve demo check test lint ste clean clean-all open
 
 help:
 	@echo "make demo        install, download data, train, precompute, and start the UI"
@@ -27,6 +27,7 @@ help:
 	@echo "make precompute  run Stage 1-3 and write out/ (FORCE=1 to recompute)"
 	@echo "make serve       start the API (:$(API_PORT)) and the web UI (:$(WEB_PORT))"
 	@echo "make check       ruff, pytest, tsc --noEmit, eslint, STE lint"
+	@echo "make chalk-apply bundle chalk/data and deploy chalk/ to Chalk (BRANCH=name for a branch)"
 
 install: install-py install-web
 
@@ -75,6 +76,10 @@ ste:
 	$(PY) scripts/ste_lint.py --quiet-warnings
 
 check: lint test ste
+
+chalk-apply:
+	$(PY) scripts/chalk_bundle.py
+	cd chalk && . ../.venv/bin/activate && chalk apply $(if $(BRANCH),--branch $(BRANCH),)
 
 clean:
 	rm -rf out

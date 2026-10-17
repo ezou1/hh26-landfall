@@ -18,11 +18,18 @@ The first run takes 30 min to 90 min on a 12-core CPU. The OSM download is the s
 
 ## Use the remote Chalk deployment
 
-1. Set `CHALK_MODE=remote` in `.env`.
-2. Set `CHALK_CLIENT_ID`, `CHALK_CLIENT_SECRET`, and `CHALK_ENVIRONMENT`.
-3. Run `make precompute FORCE=1`.
+1. In the Chalk dashboard, open Settings and create a service token. Give it online query, offline query, and deploy permissions.
+2. Set `CHALK_CLIENT_ID`, `CHALK_CLIENT_SECRET`, and `CHALK_ENVIRONMENT` in `.env`.
+3. Install the Chalk CLI and run `chalk login`.
+4. Run `make chalk-apply` to deploy the features and resolvers in `chalk/`. Use `BRANCH=<name>` for a branch deploy after the first deploy.
+5. Set `CHALK_MODE=remote` in `.env`.
+6. Run `make precompute FORCE=1`.
 
 If a remote query fails, the pipeline uses the local runtime. It logs a WARNING, and the HUD shows the "FALLBACK DATA" chip.
+
+The Chalk project is the folder `chalk/`, not the repository root. `make chalk-apply` first copies 3 small data files to `chalk/data/`. The deployed resolvers read these files.
+
+CAUTION: Chalk Compute is off by default. Set `CHALK_COMPUTE=1` only if your Chalk account has free scaling-group capacity. The sandbox also needs the pipeline code, so this path is not complete.
 
 ## Rerun one advisory from the UI or the API
 
@@ -50,7 +57,7 @@ The results come from this build on 2026-10-17. The machine had 12 CPU cores, 15
 | Item | Result | Details |
 | --- | --- | --- |
 | 1. `make demo` from a clean clone | PASS | A fresh clone in a new folder ran install, data, train, and precompute in 82 min with no manual step. The OSM download took 45 min of that time, because 3 Overpass servers were busy and the 4th server was slow. The clone gave the same numbers as the main build. Then the clone ran npm ci and make serve: the UI answered on port 5173 with the API data through the proxy. We ran the two halves in sequence, not as one make demo command. |
-| 2. `CHALK_MODE=local make demo` | PASS | Local mode is the default mode, so item 1 also covers it. Remote mode without credentials falls back to local and records the fallback. |
+| 2. `CHALK_MODE=local make demo` | PASS | Local mode is the default mode, so item 1 also covers it. Remote mode without credentials falls back to local and records the fallback. With credentials, remote mode also completes with the same results. |
 | 3. `make check` | PASS | ruff: all checks passed. pytest: 28 passed. tsc --noEmit and eslint (0 warnings allowed): passed. STE lint: 0 errors in 103 files. |
 | 4a. The p90 cone at T0 covers Tampa Bay and Fort Myers | PASS | `scripts/acceptance.py` |
 | 4b. At 2022-09-27 00Z the cone narrows to Charlotte Harbor and Fort Myers | FAIL | The p50 cone covers Fort Myers and Charlotte Harbor, but it also covers Tampa Bay. The p90 cone is wider than at T0, because more members live to 120 h and some recurve east. |
@@ -68,4 +75,4 @@ The results come from this build on 2026-10-17. The machine had 12 CPU cores, 15
 
 - The demo used real data for every source. No fallback was necessary.
 - The UI ran without a Cesium ion token, so it used Esri imagery on an ellipsoid. We could not test Google Photorealistic 3D Tiles.
-- We could not test `CHALK_MODE=remote` against a real deployment, because no credentials were available.
+- On 2026-10-17 a later run used `CHALK_MODE=remote` against a real Chalk deployment. The full precompute took 4.7 min, recorded no fallback, and gave the same results as local mode.

@@ -1,0 +1,5 @@
+# chalk apply uploads this folder. These files run only in the LANDFALL pipeline, not in Chalk.
+local_runtime.py
+compute.py
+__pycache__
+*.pyc

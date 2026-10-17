@@ -21,8 +21,15 @@ _REMOTE: dict[str, Any] = {}
 
 
 def _remote_enabled() -> bool:
-    return os.environ.get("CHALK_MODE", "local").lower() == "remote" and bool(
-        os.environ.get("CHALK_CLIENT_ID")
+    """Return True if remote mode, credentials, and CHALK_COMPUTE=1 are all set.
+
+    Compute is opt-in: a sandbox needs the pipeline code and the cached plan context.
+    Also, the account must have free scaling-group capacity.
+    """
+    return (
+        os.environ.get("CHALK_MODE", "local").lower() == "remote"
+        and bool(os.environ.get("CHALK_CLIENT_ID"))
+        and os.environ.get("CHALK_COMPUTE", "0") == "1"
     )
 
 
@@ -36,7 +43,7 @@ def _wrap_remote(name: str, fn: Callable[..., Any]) -> Any | None:
         image = cc.Image.debian_slim().pip_install(
             ["numpy", "pandas", "scipy", "highspy", "ortools", "networkx", "torch", "pyarrow"]
         )
-        remote = cc.function(fn, image=image, cpu="2", memory="4Gi", name=f"landfall_{name}")
+        remote = cc.function(fn, image=image, cpu="2", memory="4Gi", name=f"landfall_{name}")  # 2Gi minimum per CPU
         _REMOTE[name] = remote
         return remote
     except Exception as exc:  # noqa: BLE001

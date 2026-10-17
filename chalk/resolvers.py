@@ -17,11 +17,25 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[1]
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
 CACHE = ROOT / "data" / "cache"
 STATIC = ROOT / "data" / "static"
+BUNDLE = HERE / "data"  # small data files that chalk apply uploads with the code
 SST_FILE = STATIC / "sst_clim_2deg.npz"
 FIXES_PARQUET = CACHE / "storm_fixes.parquet"
+BUNDLED_FIXES = BUNDLE / "storm_fixes.parquet"
+LAND_FILE = STATIC / "land_dist_0p1.npz"
+BASIN = (-110.0, 0.0, 0.0, 60.0)  # west, south, east, north of the land-distance grid
+BASIN_RES = 0.1
+
+
+def _existing(*paths: Path) -> Path:
+    """Return the first path that exists, or the first path."""
+    for p in paths:
+        if p.exists():
+            return p
+    return paths[0]
 
 ATKINSON_A = 6.7
 ATKINSON_B = 0.644
@@ -61,9 +75,10 @@ def sst_proxy_vec(lat: np.ndarray, lon: np.ndarray, month: np.ndarray) -> np.nda
     """Return the climatological SST proxy for arrays of points and months."""
     global _SST
     if _SST is None:
-        if not SST_FILE.exists():
+        path = _existing(SST_FILE, BUNDLE / SST_FILE.name)
+        if not path.exists():
             build_sst_climatology()
-        z = np.load(SST_FILE)
+        z = np.load(path)
         _SST = {k: z[k] for k in ("lat", "lon", "sst")}
     lat_a = np.asarray(lat, dtype=float)
     lon_a = np.asarray(lon, dtype=float)
@@ -79,9 +94,31 @@ def sst_proxy_c_fn(lat: float, lon: float, time: datetime) -> float:
 
 
 # ----------------------------------------------------------------- fixes
+FIX_COLUMNS = ["id", "storm_id", "time", "lat", "lon", "vmax_kt", "pmin_mb", "status", "source"]
+_FIXES: pd.DataFrame | None = None
+
+
 def load_storm_fixes_fn() -> pd.DataFrame:
-    """Return every StormFix row from the parquet cache (HURDAT2, CARQ, and OFCL)."""
-    return pd.read_parquet(FIXES_PARQUET)
+    """Return every StormFix row: the repository cache if it exists, or the bundled copy."""
+    global _FIXES
+    if _FIXES is None:
+        _FIXES = pd.read_parquet(_existing(FIXES_PARQUET, BUNDLED_FIXES))
+    return _FIXES
+
+
+def fixes_for_storm_fn(storm_id: str) -> pd.DataFrame:
+    """Return the HURDAT2 and CARQ fixes of one storm (not the OFCL forecast rows)."""
+    f = load_storm_fixes_fn()
+    f = f[(f["storm_id"] == storm_id) & f["source"].isin(["hurdat2", "carq"])]
+    return f[FIX_COLUMNS].sort_values("time").reset_index(drop=True)
+
+
+def plain_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Return a frame with bare column names, for example "time" for "storm_fix.time"."""
+    out = df.rename(columns={c: str(c).split(".")[-1] for c in df.columns})
+    if "time" in out.columns:
+        out["time"] = pd.to_datetime(out["time"], utc=True)
+    return out
 
 
 def build_storm_fixes(hurdat: pd.DataFrame, adeck: pd.DataFrame) -> pd.DataFrame:
@@ -123,7 +160,8 @@ def storm_state_from_fixes_fn(fixes: pd.DataFrame, now: datetime, fix_source: st
     f = f[f["time"] <= now_ts].sort_values("time")
     if f.empty:
         return {}
-    t = (f["time"].astype("int64").to_numpy() // 10**9) / 3600.0
+    # Hours since the epoch. Do not use astype(int64): Chalk frames hold microseconds, pandas nanoseconds.
+    t = ((f["time"] - pd.Timestamp(0, tz="UTC")).dt.total_seconds() / 3600.0).to_numpy()
     lat = f["lat"].to_numpy(dtype=float)
     lon = f["lon"].to_numpy(dtype=float)
     v = f["vmax_kt"].to_numpy(dtype=float)
@@ -163,67 +201,111 @@ def storm_targets_fn(fixes: pd.DataFrame, time: datetime, fix_source: str) -> di
     }
 
 
+_LAND: tuple[np.ndarray, np.ndarray, np.ndarray] | None = None
+
+
+def land_distance_vec(lat: np.ndarray, lon: np.ndarray) -> np.ndarray:
+    """Return the signed distance to the coast in km for arrays. The value is negative over land."""
+    global _LAND
+    if _LAND is None:
+        z = np.load(_existing(LAND_FILE, BUNDLE / LAND_FILE.name))
+        _LAND = (z["lon"], z["lat"], z["dist_km"].astype(np.float32))
+    glon, glat, dist = _LAND
+    lat_a = np.asarray(lat, dtype=float)
+    lon_a = np.asarray(lon, dtype=float)
+    i = np.clip(((lat_a - glat[0]) / BASIN_RES).round().astype(int), 0, len(glat) - 1)
+    j = np.clip(((lon_a - glon[0]) / BASIN_RES).round().astype(int), 0, len(glon) - 1)
+    out = dist[i, j].astype(float)
+    outside = (lon_a < BASIN[0]) | (lon_a > BASIN[2]) | (lat_a < BASIN[1]) | (lat_a > BASIN[3])
+    return np.where(outside, 500.0, out)
+
+
 def land_distance_km_fn(lat: float, lon: float) -> float:
     """Return the signed distance to the coast in km. The value is negative over land."""
-    import sys
-
-    sys.path.insert(0, str(ROOT))
-    from landfall.ingest.geo import land_distance_km
-
-    return float(land_distance_km(lon, lat))
+    return float(land_distance_vec(np.array([lat]), np.array([lon]))[0])
 
 
 # ----------------------------------------------------------------- Chalk decorators
-def register_chalk_resolvers() -> dict[str, object]:
-    """Wrap the plain functions with the Chalk decorators and return the resolvers.
+# chalk apply discovers resolvers at import time, so the decorated resolvers live at module level.
+# The Chalk project root is chalk/, so "features" is the module chalk/features.py.
+from features import Storm, StormFix, StormState  # noqa: E402
 
-    Chalk remote mode imports this module and calls this function. The function only
-    builds decorator objects. It does not contact a Chalk server.
+from chalk import Now, offline, online  # noqa: E402
+from chalk.features import DataFrame, Features  # noqa: E402
+
+
+def _fix_frame(df: pd.DataFrame) -> DataFrame:
+    """Return a Chalk DataFrame with the fully qualified StormFix column names."""
+    return DataFrame(df[FIX_COLUMNS].rename(columns={c: str(getattr(StormFix, c)) for c in FIX_COLUMNS}))
+
+
+STATE_OUTPUTS = [
+    "lat", "lon", "vmax_kt", "pmin_mb", "dlat_6", "dlon_6", "dv_6", "dlat_12", "dlon_12", "dv_12",
+    "dlat_24", "dlon_24", "dv_24", "heading_deg", "speed_kt", "day_of_year", "hours_since_genesis",
+]
+
+
+@offline
+def load_storm_fixes() -> DataFrame[
+    StormFix.id, StormFix.storm_id, StormFix.time, StormFix.lat, StormFix.lon,
+    StormFix.vmax_kt, StormFix.pmin_mb, StormFix.status, StormFix.source,
+]:
+    """Load every HURDAT2 and CARQ fix into StormFix (offline scan)."""
+    f = load_storm_fixes_fn()
+    return _fix_frame(f[f["source"].isin(["hurdat2", "carq"])])
+
+
+@online
+def storm_fixes(storm_id: Storm.id) -> Storm.fixes:
+    """Return the fixes of one storm for online and offline queries."""
+    return _fix_frame(fixes_for_storm_fn(storm_id))
+
+
+@online
+def storm_state_from_fixes(
+    fixes: StormState.storm.fixes, fix_source: StormState.fix_source, now: Now
+) -> Features[
+    StormState.lat, StormState.lon, StormState.vmax_kt, StormState.pmin_mb,
+    StormState.dlat_6, StormState.dlon_6, StormState.dv_6,
+    StormState.dlat_12, StormState.dlon_12, StormState.dv_12,
+    StormState.dlat_24, StormState.dlon_24, StormState.dv_24,
+    StormState.heading_deg, StormState.speed_kt, StormState.day_of_year,
+    StormState.hours_since_genesis,
+]:
+    """Compute the point-in-time StormState from the fixes at or before now."""
+    out = storm_state_from_fixes_fn(plain_columns(fixes.to_pandas()), now, fix_source)
+    return StormState(**{k: out.get(k) for k in STATE_OUTPUTS})
+
+
+@online
+def sst_proxy(lat: StormState.lat, lon: StormState.lon, now: Now) -> StormState.sst_proxy_c:
+    """Return the SST proxy at the storm position and month."""
+    return sst_proxy_c_fn(lat, lon, now)
+
+
+@online
+def land_distance(lat: StormState.lat, lon: StormState.lon) -> StormState.land_distance_km:
+    """Return the signed distance to the coast at the storm position."""
+    return land_distance_km_fn(lat, lon)
+
+
+@offline
+def storm_targets(
+    storm_id: StormState.storm_id, fix_source: StormState.fix_source, time: StormState.time
+) -> Features[StormState.tgt_dlat_6, StormState.tgt_dlon_6, StormState.tgt_dv_6]:
+    """Return the 6-h change after the row time. Only training queries use it.
+
+    A label needs the next fix. Chalk shows a has-many relation only up to the row time,
+    so this offline resolver reads the fixes of the storm directly.
     """
-    import features as fx  # the Chalk project root is chalk/
+    return StormState(**storm_targets_fn(fixes_for_storm_fn(storm_id), time, fix_source))
 
-    from chalk import Now, offline, online
-    from chalk.features import DataFrame, Features
 
-    StormFix, StormState = fx.StormFix, fx.StormState
-
-    @offline
-    def load_storm_fixes() -> DataFrame[
-        StormFix.id, StormFix.storm_id, StormFix.time, StormFix.lat, StormFix.lon,
-        StormFix.vmax_kt, StormFix.pmin_mb, StormFix.status, StormFix.source,
-    ]:
-        return DataFrame(load_storm_fixes_fn())
-
-    @online
-    def storm_state_from_fixes(
-        fixes: StormState.storm.fixes, fix_source: StormState.fix_source, now: Now
-    ) -> Features[
-        StormState.lat, StormState.lon, StormState.vmax_kt, StormState.pmin_mb,
-        StormState.dlat_6, StormState.dlon_6, StormState.dv_6,
-        StormState.dlat_12, StormState.dlon_12, StormState.dv_12,
-        StormState.dlat_24, StormState.dlon_24, StormState.dv_24,
-        StormState.heading_deg, StormState.speed_kt, StormState.day_of_year,
-        StormState.hours_since_genesis,
-    ]:
-        out = storm_state_from_fixes_fn(fixes.to_pandas(), now, fix_source)
-        return StormState(**out)
-
-    @online
-    def sst_proxy(lat: StormState.lat, lon: StormState.lon, now: Now) -> StormState.sst_proxy_c:
-        return sst_proxy_c_fn(lat, lon, now)
-
-    @online
-    def land_distance(lat: StormState.lat, lon: StormState.lon) -> StormState.land_distance_km:
-        return land_distance_km_fn(lat, lon)
-
-    @offline
-    def storm_targets(
-        fixes: StormState.storm.fixes, fix_source: StormState.fix_source, time: StormState.time
-    ) -> Features[StormState.tgt_dlat_6, StormState.tgt_dlon_6, StormState.tgt_dv_6]:
-        return StormState(**storm_targets_fn(fixes.to_pandas(), time, fix_source))
-
+def register_chalk_resolvers() -> dict[str, object]:
+    """Return the Chalk resolvers of this module by name."""
     return {
         "load_storm_fixes": load_storm_fixes,
+        "storm_fixes": storm_fixes,
         "storm_state_from_fixes": storm_state_from_fixes,
         "sst_proxy": sst_proxy,
         "land_distance": land_distance,
