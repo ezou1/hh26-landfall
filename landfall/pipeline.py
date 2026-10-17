@@ -213,6 +213,17 @@ def run_stage1(adv: datetime, pred: Predictor, fixes: pd.DataFrame, adeck: pd.Da
     return Stage1Result(adv, ro, scen, ofcl_cat)
 
 
+def stage1_job(adv_iso: str, n: int, k: int, index: int) -> Stage1Result:
+    """Run Stage 1 for one advisory in a worker (the Stage 1 sampler of the compute fan-out)."""
+    import os
+
+    import torch
+
+    torch.set_num_threads(max(1, (os.cpu_count() or 4) // 4))
+    adv = datetime.fromisoformat(adv_iso.replace("Z", "+00:00"))
+    return run_stage1(adv, Predictor.load(), ensure_fixes_cache(), atcf.load(), n, k, index)
+
+
 # ------------------------------------------------------------------ context
 @dataclass
 class Static:
@@ -528,9 +539,7 @@ def main(argv: list[str] | None = None) -> None:
     C.OUT.mkdir(exist_ok=True)
     log_mode()
     t_all = time.perf_counter()
-    pred = Predictor.load()
     fixes = ensure_fixes_cache()
-    adeck = atcf.load()
     st = load_static()
     write_static(st)
     write_truth(fixes)
@@ -544,9 +553,14 @@ def main(argv: list[str] | None = None) -> None:
             advs.append(a)
     advs = sorted(advs)
     _ = online_state
-    s1: dict[datetime, Stage1Result] = {}
-    for i, a in enumerate(advs):
-        s1[a] = run_stage1(a, pred, fixes, adeck, args.n, args.k, i)
+    from landfall.predict.features import chalk_module
+
+    compute = chalk_module("compute")
+    index = {a: i for i, a in enumerate(C.advisory_times() + [p for p in C.PLAN_ADVISORIES if p not in C.advisory_times()])}
+    with stage("stage1.all", advisories=len(advs)):
+        res1 = compute.fan_out("stage1_sampler", stage1_job,
+                               [(iso(a), args.n, args.k, index.get(a, 0)) for a in advs], n_jobs=4)
+    s1: dict[datetime, Stage1Result] = {r.advisory: r for r in res1}
     if not args.skip_verify:
         from landfall.predict.verify import verify
 

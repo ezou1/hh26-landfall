@@ -87,6 +87,7 @@ def download_graph() -> nx.MultiDiGraph | None:
     for attempt, url in enumerate(OVERPASS_URLS * 2):
         try:
             ox.settings.overpass_url = url
+            ox.settings.cache_folder = str(CACHE / "osmnx")
             ox.settings.requests_timeout = 300
             get_logger().info("osmnx download", place=PLACE, overpass=url, attempt=attempt + 1)
             g = ox.graph_from_place(PLACE, network_type="drive", simplify=True, retain_all=False)
