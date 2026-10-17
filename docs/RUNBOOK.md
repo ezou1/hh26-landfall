@@ -9,7 +9,7 @@ This runbook gives the procedures to operate LANDFALL and the results of the acc
 3. Run `make demo`.
 4. Open `http://localhost:5173` if the browser does not open.
 
-The first run takes about 25 min on a 12-core CPU. The precompute step takes about 23 min of that time. Later runs skip the precompute step if `out/` is complete.
+The first run takes 30 min to 90 min on a 12-core CPU. The OSM download is the slowest step if the Overpass servers are busy. The precompute step takes about 10 min. Later runs skip the precompute step if `out/` is complete.
 
 ## Compute the artifacts again
 
@@ -49,7 +49,7 @@ The results come from this build on 2026-10-17. The machine had 12 CPU cores, 15
 
 | Item | Result | Details |
 | --- | --- | --- |
-| 1. `make demo` from a clean clone | ITEM1 | ITEM1D |
+| 1. `make demo` from a clean clone | PASS | A fresh clone in a new folder ran install, data, train, and precompute in 82 min with no manual step. The OSM download took 45 min of that time, because 3 Overpass servers were busy and the 4th server was slow. The clone gave the same numbers as the main build. Then the clone ran npm ci and make serve: the UI answered on port 5173 with the API data through the proxy. We ran the two halves in sequence, not as one make demo command. |
 | 2. `CHALK_MODE=local make demo` | PASS | Local mode is the default mode, so item 1 also covers it. Remote mode without credentials falls back to local and records the fallback. |
 | 3. `make check` | PASS | ruff: all checks passed. pytest: 28 passed. tsc --noEmit and eslint (0 warnings allowed): passed. STE lint: 0 errors in 103 files. |
 | 4a. The p90 cone at T0 covers Tampa Bay and Fort Myers | PASS | `scripts/acceptance.py` |

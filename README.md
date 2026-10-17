@@ -13,7 +13,7 @@ The demo replays Hurricane Ian (AL092022) over Lee County, Florida, from 2022-09
 3. Run `make demo`.
 4. Open `http://localhost:5173`.
 
-`make demo` installs the dependencies, downloads the data, trains the model, runs all stages, and starts the API and the UI. The first run takes about 25 min on a 12-core CPU. Later runs use the cache.
+`make demo` installs the dependencies, downloads the data, trains the model, runs all stages, and starts the API and the UI. The first run takes 30 min to 90 min on a 12-core CPU, because the downloads are slow. Later runs use the cache.
 
 To use the in-process Chalk runtime, run `CHALK_MODE=local make demo`.
 
