@@ -1,0 +1,62 @@
+[project]
+name = "landfall"
+version = "0.1.0"
+description = "Hurricane prediction and response-logistics planner"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi==0.115.12",
+  "uvicorn[standard]==0.34.2",
+  "pydantic==2.11.4",
+  "numpy==2.2.5",
+  "pandas==2.2.3",
+  "pyarrow==20.0.0",
+  "scipy==1.15.3",
+  "highspy==1.10.0",
+  "ortools==9.12.4544",
+  "networkx==3.4.2",
+  "osmnx==2.0.3",
+  "geopandas==1.0.1",
+  "shapely==2.1.0",
+  "pyproj==3.7.1",
+  "rasterio==1.4.3",
+  "scikit-learn==1.6.1",
+  "torch==2.7.0",
+  "joblib==1.5.0",
+  "structlog==25.3.0",
+  "requests==2.32.3",
+  "python-dotenv==1.1.0",
+  "chalkpy==2.163.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff==0.11.10",
+  "pytest==8.3.5",
+  "httpx==0.28.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["web", "out", "data", ".dev"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

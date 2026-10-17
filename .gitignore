@@ -1,0 +1,14 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+data/raw/
+data/cache/
+out/
+web/node_modules/
+web/dist/
+web/.mock/
+.dev/
+*:Zone.Identifier
