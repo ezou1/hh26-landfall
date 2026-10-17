@@ -15,7 +15,9 @@ Today, people make these decisions with a cone on a map, a clearance-time table,
 
 ## What LANDFALL does (30 s)
 
-LANDFALL turns the forecast into a plan, and it gives the plan a probability. It replays Hurricane Ian over Lee County, Florida, from 2022-09-25 to 2022-09-30. At each advisory, it predicts 1,000 possible tracks. It converts each track into wind, surge, damage, and blocked roads. Then it plans the evacuation, the supplies, and the rescue work for all of them at once. The result shows on a 3D globe with a timeline. The manager sees the expected case, the worst 10%, and the one plan that works best across all cases.
+LANDFALL turns the forecast into a plan, and it gives the plan a probability. It replays Hurricane Ian over Lee County, Florida, from 2022-09-25 to 2022-09-30. At each advisory, it predicts 1,000 possible tracks. It converts each track into wind, surge, damage, and blocked roads. Then it plans the evacuation, the supplies, and the rescue work for all of them at once.
+
+The result shows on a 3D globe with a timeline. The manager sees the expected case, the worst 10%, and the one plan that works best across all cases.
 
 ## How the backend works (60 s)
 
