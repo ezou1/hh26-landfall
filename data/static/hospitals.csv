@@ -1,0 +1,7 @@
+id,name,lat,lon,beds,has_helipad,trauma_level
+h01,Lee Memorial Hospital,26.6268,-81.8706,415,True,2
+h02,Gulf Coast Medical Center,26.552,-81.7976,650,True,0
+h03,Cape Coral Hospital,26.6348,-81.9426,291,True,0
+h04,HealthPark Medical Center,26.5068,-81.8538,450,True,0
+h05,Lehigh Regional Medical Center,26.6014,-81.6434,88,False,0
+h06,"NCH Baker Hospital (Collier, overflow)",26.1547,-81.7986,420,True,0

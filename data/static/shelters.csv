@@ -1,0 +1,13 @@
+id,name,lat,lon,capacity,is_special_needs
+sh01,Hertz Arena,26.4268,-81.7716,4000,False
+sh02,Estero Recreation Center,26.4327,-81.7903,1200,True
+sh03,Island Coast High School,26.6834,-81.9958,2000,False
+sh04,Ida S. Baker High School,26.5938,-81.9866,2000,False
+sh05,South Fort Myers High School,26.5413,-81.8644,1800,False
+sh06,Riverdale High School,26.6537,-81.7562,2000,False
+sh07,North Fort Myers High School,26.6921,-81.8894,1800,False
+sh08,Gateway High School,26.5789,-81.7518,1600,False
+sh09,Harns Marsh Middle School,26.6378,-81.6439,1400,False
+sh10,Lehigh Senior High School,26.6181,-81.6555,1800,True
+sh11,Treeline Elementary School,26.5428,-81.752,1000,False
+sh12,Veterans Park Recreation Center,26.6128,-81.6402,900,False

@@ -1,0 +1,27 @@
+id,kind,name,base_lat,base_lon,speed_kmh,capacity_persons,endurance_h
+a01,helo,USCG MH-60T 6001,26.5862,-81.8633,260,6,4.5
+a02,helo,USCG MH-60T 6002,26.5862,-81.8633,260,6,4.5
+a03,helo,State UH-60 101,26.5362,-81.7552,240,8,3.0
+a04,helo,State UH-60 102,26.5362,-81.7552,240,8,3.0
+b01,boat,Rescue boat 01,26.54,-81.957,30,8,10.0
+b02,boat,Rescue boat 02,26.483,-82.01,30,8,10.0
+b03,boat,Rescue boat 03,26.645,-81.87,30,8,10.0
+b04,boat,Rescue boat 04,26.633,-82.067,30,8,10.0
+b05,boat,Rescue boat 05,26.456,-81.952,30,8,10.0
+b06,boat,Rescue boat 06,26.565,-81.98,30,8,10.0
+b07,boat,Rescue boat 07,26.69,-81.91,30,8,10.0
+b08,boat,Rescue boat 08,26.4,-81.85,30,8,10.0
+b09,boat,Rescue boat 09,26.61,-81.88,30,8,10.0
+b10,boat,Rescue boat 10,26.51,-81.92,30,8,10.0
+w01,high_water_truck,High-water truck 01,26.636,-81.81,40,12,12.0
+w02,high_water_truck,High-water truck 02,26.543,-81.76,40,12,12.0
+w03,high_water_truck,High-water truck 03,26.63,-81.95,40,12,12.0
+w04,high_water_truck,High-water truck 04,26.61,-81.65,40,12,12.0
+w05,high_water_truck,High-water truck 05,26.69,-81.89,40,12,12.0
+w06,high_water_truck,High-water truck 06,26.43,-81.79,40,12,12.0
+w07,high_water_truck,High-water truck 07,26.55,-81.87,40,12,12.0
+w08,high_water_truck,High-water truck 08,26.66,-81.76,40,12,12.0
+w09,high_water_truck,High-water truck 09,26.59,-81.99,40,12,12.0
+w10,high_water_truck,High-water truck 10,26.49,-81.83,40,12,12.0
+w11,high_water_truck,High-water truck 11,26.68,-81.99,40,12,12.0
+w12,high_water_truck,High-water truck 12,26.6,-81.73,40,12,12.0

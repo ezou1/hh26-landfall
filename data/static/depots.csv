@@ -1,0 +1,7 @@
+id,name,kind,lat,lon,trucks,water,food,med_kits,fuel,generators
+d01,"State Logistics Response Center, Orlando",state,28.4466,-81.4019,40,2000000,1500000,40000,400000,400
+d02,Lee County EOC Warehouse (assumed site),county,26.6362,-81.81,12,150000,100000,6000,60000,40
+d03,Lee County Logistics Annex near RSW (assumed site),county,26.5434,-81.7605,10,120000,80000,4000,50000,30
+d04,"Walmart Supercenter, Cape Coral",retail,26.6527,-81.9447,3,40000,25000,500,0,5
+d05,"Costco, Gulf Coast Town Center",retail,26.487,-81.7842,3,60000,30000,500,0,8
+d06,"Home Depot, Lehigh Acres",retail,26.6114,-81.6588,3,20000,5000,200,0,25
