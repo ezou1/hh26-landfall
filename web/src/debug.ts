@@ -13,6 +13,7 @@ import {
   stormNow,
 } from "./globe/controller";
 import { selectScenario } from "./state/data";
+import { setView } from "./state/presets";
 import { useStore, type LayerId, type Speed, type View } from "./state/store";
 
 /** The debug hooks on window.__landfall for tests and screenshots. */
@@ -45,7 +46,7 @@ export function installDebug(): void {
     play,
     pause,
     setSpeed,
-    setView: (v) => useStore.getState().set({ view: v }),
+    setView,
     selectScenario,
     setLayer: (id, on) => {
       const s = useStore.getState();

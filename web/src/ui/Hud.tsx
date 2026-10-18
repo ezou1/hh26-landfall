@@ -3,10 +3,11 @@ import { getHourF, pause, play, setSpeed } from "../globe/controller";
 import { t } from "../i18n/t";
 import { rerunPlan } from "../state/data";
 import { earliestTsArrival, windEta } from "../state/derive";
+import { setView } from "../state/presets";
 import { useStore, type Speed, type View } from "../state/store";
 import { fmtIso, fmtLong, fmtNum } from "../time";
 
-const VIEWS: View[] = ["command", "supply", "rescue", "model"];
+const VIEWS: View[] = ["plan", "command", "supply", "rescue", "model"];
 const SPEEDS: Speed[] = [1, 4, 16];
 
 
@@ -89,7 +90,7 @@ export function Hud() {
             key={v}
             className={`tab ${s.view === v ? "on" : ""}`}
             data-testid={`tab-${v}`}
-            onClick={() => s.set({ view: v })}
+            onClick={() => setView(v)}
           >
             {t(`view.${v}`)}
           </button>

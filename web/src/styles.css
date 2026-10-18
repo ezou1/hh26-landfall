@@ -594,3 +594,128 @@ table.grid tr.sel td {
 .marker.right::after {
   left: 0;
 }
+
+/* Plan view */
+.plan-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.plan-item {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 8px;
+  padding: 6px 6px;
+  border-left: 2px solid var(--line-2);
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.plan-item:hover {
+  background: #10202c;
+}
+.plan-item.sel {
+  background: #0f2a3a;
+  border-left-color: var(--magenta);
+}
+.plan-item.done {
+  opacity: 0.55;
+}
+.plan-item.now {
+  border-left-color: var(--warn);
+}
+.plan-item.late {
+  border-left-color: var(--bad);
+}
+.plan-item.info {
+  border-left-style: dashed;
+}
+.plan-time {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.plan-time .t {
+  color: var(--ink);
+  font-size: 11px;
+}
+.plan-time .d {
+  color: var(--ink-3);
+  font-size: 9.5px;
+}
+.plan-body {
+  min-width: 0;
+}
+.plan-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.plan-head .title {
+  flex: 1;
+  font-size: 11.5px;
+  color: var(--ink);
+  white-space: normal;
+}
+.plan-head .who {
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  padding: 1px 4px;
+  border-radius: 2px;
+  border: 1px solid var(--line-2);
+  color: var(--ink-2);
+  flex: none;
+}
+.plan-head .who.evac {
+  color: var(--ok);
+  border-color: #1f5a3a;
+}
+.plan-head .who.supply {
+  color: #7cf29a;
+  border-color: #2a5a3a;
+}
+.plan-head .st {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  flex: none;
+}
+.plan-head .st.now {
+  color: var(--warn);
+}
+.plan-head .st.late {
+  color: var(--bad);
+  font-weight: 600;
+}
+.plan-head .st.done {
+  color: var(--ok);
+}
+.plan-detail {
+  font-size: 10.5px;
+  color: var(--ink-2);
+  margin-top: 2px;
+  white-space: normal;
+}
+.plan-focus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 5px 8px;
+  border: 1px solid var(--magenta);
+  border-radius: 3px;
+  font-size: 10.5px;
+  color: var(--magenta);
+}
+.plan-focus span {
+  flex: 1;
+}
+.chip.late {
+  color: var(--bad);
+  border-color: var(--bad);
+  background: #2a0f12;
+}
+.btn.sm {
+  padding: 2px 6px;
+  font-size: 10.5px;
+}

@@ -1,5 +1,7 @@
 {
-  "app": { "name": "LANDFALL" },
+  "app": {
+    "name": "LANDFALL"
+  },
   "common": {
     "all": "All",
     "close": "Close",
@@ -8,12 +10,20 @@
     "yes": "yes",
     "no": "no"
   },
-  "load": { "noMeta": "The server did not send meta.json. Start the backend and reload the page." },
+  "load": {
+    "noMeta": "The server did not send meta.json. Start the backend and reload the page."
+  },
   "rerun": {
     "startFailed": "The re-plan job did not start.",
     "pollFailed": "The server did not send the job status."
   },
-  "view": { "command": "Command", "supply": "Supply", "rescue": "Rescue", "model": "Model" },
+  "view": {
+    "plan": "Plan",
+    "command": "Command",
+    "supply": "Supply",
+    "rescue": "Rescue",
+    "model": "Model"
+  },
   "hud": {
     "clock": "UTC time",
     "scenario": "Scenario",
@@ -103,7 +113,11 @@
     "expected": "Expected",
     "worst10": "Worst 10%"
   },
-  "kpi": { "unitPersons": "persons", "unitKg": "kg", "unitHours": "h" },
+  "kpi": {
+    "unitPersons": "persons",
+    "unitKg": "kg",
+    "unitHours": "h"
+  },
   "metric": {
     "persons_at_risk": "Persons at risk",
     "persons_not_cleared": "Persons not cleared",
@@ -136,7 +150,13 @@
     "showOnGlobe": "Show on globe",
     "pBlocked": "P(block) {p}%"
   },
-  "shelter": { "name": "Shelter", "open": "Open", "occupancy": "Persons", "fill": "Fill", "pFull": "P(full)" },
+  "shelter": {
+    "name": "Shelter",
+    "open": "Open",
+    "occupancy": "Persons",
+    "fill": "Fill",
+    "pFull": "P(full)"
+  },
   "zone": {
     "zone": "Zone",
     "release": "Release",
@@ -169,7 +189,11 @@
     "noUnmet": "No unmet demand in this scenario.",
     "flyDepot": "Go to {name}"
   },
-  "depotKind": { "state": "State", "county": "County", "retail": "Retail" },
+  "depotKind": {
+    "state": "State",
+    "county": "County",
+    "retail": "Retail"
+  },
   "commodity": {
     "water": "Water",
     "food": "Food",
@@ -177,7 +201,11 @@
     "fuel": "Fuel",
     "generators": "Generators"
   },
-  "shipStatus": { "planned": "planned", "enRoute": "on road", "delivered": "delivered" },
+  "shipStatus": {
+    "planned": "planned",
+    "enRoute": "on road",
+    "delivered": "delivered"
+  },
   "rescue": {
     "summary": "Rescue status",
     "rescuedNow": "Rescued now",
@@ -206,10 +234,28 @@
     "noHist": "No histogram data.",
     "histNote": "The histogram shows the full scenario. Board values show the state at {time}."
   },
-  "taskStatus": { "future": "future", "waiting": "waiting", "assigned": "assigned", "served": "served" },
-  "assetStatus": { "standby": "standby", "enRoute": "moving", "atBase": "at base", "done": "done" },
-  "assetKind": { "helo": "Helicopter", "boat": "Boat", "high_water_truck": "High-water truck" },
-  "assetKindShort": { "helo": "Helo", "boat": "Boat", "high_water_truck": "HWT" },
+  "taskStatus": {
+    "future": "future",
+    "waiting": "waiting",
+    "assigned": "assigned",
+    "served": "served"
+  },
+  "assetStatus": {
+    "standby": "standby",
+    "enRoute": "moving",
+    "atBase": "at base",
+    "done": "done"
+  },
+  "assetKind": {
+    "helo": "Helicopter",
+    "boat": "Boat",
+    "high_water_truck": "High-water truck"
+  },
+  "assetKindShort": {
+    "helo": "Helo",
+    "boat": "Boat",
+    "high_water_truck": "HWT"
+  },
   "model": {
     "advisory": "Active forecast",
     "advisoryTime": "Advisory time",
@@ -223,7 +269,11 @@
     "intensityError": "Intensity error by lead time",
     "leadH": "lead time (h)",
     "leadLabel": "Lead {h} h",
-    "method": { "model": "Model", "cliper": "CLIPER", "ofcl": "NHC official" },
+    "method": {
+      "model": "Model",
+      "cliper": "CLIPER",
+      "ofcl": "NHC official"
+    },
     "spread": "Ensemble spread and track error",
     "spreadNote": "A good ensemble has a spread near the mean track error.",
     "rankHist": "Rank histogram",
@@ -239,5 +289,66 @@
     "none": "No assumptions in meta.json.",
     "fallback": "Fallback data",
     "fallbackFiles": "These files have used_fallback=true:"
+  },
+  "plan": {
+    "title": "Plan of action",
+    "intro": "One list for the evacuation lead and the supply lead, in time order. Click a line to see it alone on the globe.",
+    "nextUp": "Next actions",
+    "noNext": "No action is due in the next 24 h.",
+    "lateCount": "{n} late",
+    "all": "All",
+    "evac": "Evacuation",
+    "supply": "Supply",
+    "phase": {
+      "before": "Before tropical-storm winds",
+      "during": "Storm over the county",
+      "after": "After the storm"
+    },
+    "status": {
+      "done": "done",
+      "late": "LATE",
+      "now": "due",
+      "next": "next",
+      "later": "later",
+      "info": "note"
+    },
+    "due": {
+      "past": "{h} h ago",
+      "in": "in {h} h",
+      "now": "now"
+    },
+    "who": {
+      "evac": "EVAC",
+      "supply": "SUPPLY",
+      "both": "ALL"
+    },
+    "focus": "Globe shows: {label}",
+    "showAll": "Show all",
+    "copy": "Copy as text",
+    "copied": "The list is on the clipboard.",
+    "item": {
+      "orderZone": "Order Zone {zone} to leave",
+      "orderZoneDetail": "{n} persons leave. Clear by {clear}. TS winds {ts}. Margin {margin}.",
+      "noOrder": "Zone {zone}: no order",
+      "noOrderDetail": "{n} persons stay. The plan does not expect a flood in this zone.",
+      "openShelter": "Open {name}",
+      "openShelterDetail": "Capacity {cap}. Peak occupancy {peak} persons.",
+      "pFull": "Fills in {p}% of the samples.",
+      "stage": "Stage supplies at {name}",
+      "deliver": "Deliver to {site}",
+      "deliverDetail": "{n} truck loads from {depot}. First truck leaves {t}.",
+      "hold": "Hold all trucks",
+      "holdDetail": "No truck moves from the first TS winds to landfall + 6 h. Last delivery before the hold: {t}.",
+      "blocked": "{name} blocked",
+      "blockedDetail": "Cause: {cause}. Open again {t}.",
+      "blockedNever": "Cause: {cause}. No reopen time in this scenario.",
+      "unmet": "Unmet demand at {site}",
+      "unmetDetail": "{qty} {unit} of {item} short in the window from {t}."
+    },
+    "cause": {
+      "tree": "trees",
+      "flood": "water",
+      "bridge": "bridge damage"
+    }
   }
 }

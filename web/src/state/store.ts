@@ -18,7 +18,13 @@ export const LAYER_IDS = [
 ] as const;
 export type LayerId = (typeof LAYER_IDS)[number];
 
-export type View = "command" | "supply" | "rescue" | "model";
+export type View = "plan" | "command" | "supply" | "rescue" | "model";
+
+/** One plan item that the globe highlights. */
+export interface Focus {
+  id: string;
+  label: string;
+}
 export type KpiMode = "expected" | "worst10";
 export type Speed = 1 | 4 | 16;
 export type PlanStatus = "idle" | "loading" | "ok" | "missing";
@@ -48,6 +54,8 @@ export interface AppState {
   followStorm: boolean;
   assumptionsOpen: boolean;
   ionToken: boolean;
+  /** The plan item that the globe highlights, or null. */
+  focus: Focus | null;
   layers: Record<LayerId, boolean>;
 
   activeAdvisory: string | null;
@@ -98,6 +106,7 @@ export const useStore = create<AppState>((set) => ({
   followStorm: false,
   assumptionsOpen: false,
   ionToken: false,
+  focus: null,
   layers: defaultLayers,
   activeAdvisory: null,
   activePlanAdvisory: null,

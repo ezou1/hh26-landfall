@@ -110,6 +110,7 @@ await settle(40000);
 // Main screenshots. Names match docs/media.
 const plan = [
   { hour: opt.commandHour, view: "command", name: "command" },
+  { hour: opt.commandHour, view: "plan", name: "plan" },
   { hour: opt.commandHour, view: "supply", name: "supply" },
   { hour: opt.rescueHour, view: "rescue", name: "rescue" },
   { hour: 30, view: "model", name: "model" },

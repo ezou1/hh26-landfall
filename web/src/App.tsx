@@ -8,6 +8,7 @@ import { Hud } from "./ui/Hud";
 import { LayerRail } from "./ui/LayerRail";
 import { CommandPanel } from "./ui/panels/CommandPanel";
 import { ModelPanel } from "./ui/panels/ModelPanel";
+import { PlanningPanel } from "./ui/panels/PlanningPanel";
 import { RescuePanel } from "./ui/panels/RescuePanel";
 import { SupplyPanel } from "./ui/panels/SupplyPanel";
 import { Timeline } from "./ui/Timeline";
@@ -52,6 +53,7 @@ export function App() {
         </div>
       </main>
       <aside className="panel">
+        {view === "plan" && <PlanningPanel />}
         {view === "command" && <CommandPanel />}
         {view === "supply" && <SupplyPanel />}
         {view === "rescue" && <RescuePanel />}

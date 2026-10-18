@@ -9,10 +9,12 @@ import {
   JulianDate,
   Math as CMath,
   Matrix4,
+  PointPrimitiveCollection,
   PolylineCollection,
   Material,
   type Viewer,
 } from "cesium";
+import type { LonLat } from "../api/types";
 import { advisoryAt, requestAdvisory } from "../state/data";
 import { useStore, type Speed } from "../state/store";
 import { CzmlManager } from "./czml";
@@ -52,6 +54,8 @@ const layers: GlobeLayer[] = [
 ];
 let lastHour = Number.NaN;
 let lastFollow = 0;
+const focusLines = new PolylineCollection();
+const focusPoints = new PointPrimitiveCollection();
 let lastStoreUpdate = 0;
 let tickCount = 0;
 
@@ -154,6 +158,8 @@ export function attachViewer(v: Viewer): void {
   lastHour = Number.NaN;
   czml = new CzmlManager(v);
   for (const l of layers) l.init(v);
+  v.scene.primitives.add(focusLines);
+  v.scene.primitives.add(focusPoints);
   const vis = useStore.getState().layers;
   for (const l of layers) l.setVisible(vis[l.id]);
   unsub?.();
@@ -241,6 +247,37 @@ export function flyToPath(path: [number, number][]): void {
   v.camera.flyToBoundingSphere(bs, {
     offset: new HeadingPitchRange(CMath.toRadians(20), CMath.toRadians(-55), Math.max(6000, bs.radius * 3.2)),
     duration: 1.2,
+  });
+}
+
+/** Remove the plan highlight from the globe. */
+export function clearHighlight(): void {
+  focusLines.removeAll();
+  focusPoints.removeAll();
+}
+
+/** Draw a bright line over a path. The line stays until clearHighlight runs. */
+export function highlightPath(path: LonLat[]): void {
+  clearHighlight();
+  if (path.length < 2) return;
+  focusLines.add({
+    positions: Cartesian3.fromDegreesArrayHeights(path.flatMap((p) => [p[0], p[1], 80])),
+    width: 9,
+    material: Material.fromType("PolylineGlow", { color: Color.fromCssColorString("#ff3df2").withAlpha(0.95), glowPower: 0.3 }),
+  });
+}
+
+/** Draw a bright point at a site. The point stays until clearHighlight runs. */
+export function highlightPoint(lon: number, lat: number): void {
+  clearHighlight();
+  if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
+  focusPoints.add({
+    position: Cartesian3.fromDegrees(lon, lat, 120),
+    pixelSize: 18,
+    color: Color.fromCssColorString("#ff3df2").withAlpha(0.35),
+    outlineColor: Color.fromCssColorString("#ff3df2"),
+    outlineWidth: 3,
+    disableDepthTestDistance: Number.POSITIVE_INFINITY,
   });
 }
 
