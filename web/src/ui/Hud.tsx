@@ -8,7 +8,7 @@ import { useStore, type Speed, type View } from "../state/store";
 import { fmtIso, fmtLong, fmtNum } from "../time";
 
 const VIEWS: View[] = ["plan", "command", "supply", "rescue", "model"];
-const SPEEDS: Speed[] = [1, 4, 16];
+const SPEEDS: Speed[] = [0.1, 1, 4, 16];
 
 
 function useClockMs(): number {

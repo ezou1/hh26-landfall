@@ -26,7 +26,7 @@ export interface Focus {
   label: string;
 }
 export type KpiMode = "expected" | "worst10";
-export type Speed = 1 | 4 | 16;
+export type Speed = 0.1 | 1 | 4 | 16;
 export type PlanStatus = "idle" | "loading" | "ok" | "missing";
 
 export interface RerunState {
