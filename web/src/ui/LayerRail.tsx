@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { createPortal } from "react-dom";
 import { home } from "../globe/controller";
 import { SURGE_BANDS } from "../globe/layers/surge";
 import { WIND_LEVELS } from "../globe/layers/wind";
@@ -19,6 +21,28 @@ const SWATCH: Record<LayerId, string> = {
   infra: "#ff3df2",
 };
 
+/** The hover note for the storm tracks. The rail clips an inner note, so the note opens beside the icon. */
+function StormInfo() {
+  const [box, setBox] = useState<DOMRect | null>(null);
+  return (
+    <span
+      className="info-i"
+      onMouseEnter={(e) => setBox(e.currentTarget.getBoundingClientRect())}
+      onMouseLeave={() => setBox(null)}
+      onClick={(e) => e.stopPropagation()}
+    >
+      i
+      {box &&
+        createPortal(
+          <span className="info-tip" role="tooltip" style={{ left: box.right + 8, top: box.top + box.height / 2 }}>
+            {t("layerTip.stormTracks")}
+          </span>,
+          document.body,
+        )}
+    </span>
+  );
+}
+
 /** The left rail: layer toggles, camera controls, and a short legend. */
 export function LayerRail() {
   const layers = useStore((s) => s.layers);
@@ -38,6 +62,7 @@ export function LayerRail() {
         >
           <span className="sw" style={{ background: layers[id] ? SWATCH[id] : "transparent" }} />
           {t(`layer.${id}`)}
+          {id === "storm" && <StormInfo />}
         </button>
       ))}
       <div className="cam">

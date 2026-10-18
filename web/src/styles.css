@@ -198,6 +198,39 @@ button {
   border: 1px solid var(--line-2);
   flex: none;
 }
+.layer-btn .info-i {
+  margin-left: auto;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  color: var(--ink-3);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 12px;
+  text-align: center;
+  flex: none;
+}
+.layer-btn .info-i:hover {
+  color: var(--ink);
+  border-color: var(--ink-3);
+}
+.info-tip {
+  position: fixed;
+  z-index: 40;
+  width: 210px;
+  transform: translateY(-50%);
+  padding: 8px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--line-2);
+  border-radius: 4px;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: left;
+  pointer-events: none;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+}
 .rail .cam {
   margin-top: 12px;
   display: flex;

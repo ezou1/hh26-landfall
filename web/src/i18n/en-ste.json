@@ -60,6 +60,7 @@
   },
   "layerTip": {
     "storm": "Ensemble tracks, cone, and the selected track.",
+    "stormTracks": "Light lines show possible tracks. The bold line shows the mean track.",
     "wind": "Sustained wind rings for the selected scenario.",
     "surge": "Surge depth bands. They show six hours before the peak.",
     "zones": "Zone color shows the release status at the clock time.",

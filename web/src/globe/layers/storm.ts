@@ -42,7 +42,7 @@ function fixesToPath(fixes: TrackFix[]): LonLat[] {
   return cleanLine(fixes.map((f) => [f.lon, f.lat] as LonLat));
 }
 
-/** The storm layer: ensemble tracks, the cone, the selected track, and the storm marker. */
+/** The storm layer: ensemble tracks, the mean track, the cone, the selected track, and the storm marker. */
 export class StormLayer implements GlobeLayer {
   readonly id = "storm" as const;
   private ensemble!: SwapPrimitive<Primitive>;
@@ -213,8 +213,8 @@ export class StormLayer implements GlobeLayer {
       if (path.length >= 2) lines.push({ id: `ens:${i}`, path, color, width: 1, height: 1000 });
     });
     const mean = cleanLine((ens.mean ?? []).map((p) => [p[0], p[1]] as LonLat));
-    if (mean.length >= 2) lines.push({ id: "ens:mean", path: mean, color: css("#ffffff", 0.55), width: 1.5, height: 1100 });
-    return buildLinePrimitive(lines, true);
+    if (mean.length >= 2) lines.push({ id: "ens:mean", path: mean, color: css("#ffffff", 0.9), width: 2.5, height: 1100 });
+    return lines.length > 0 ? buildLinePrimitive(lines, true) : null;
   }
 
   setVisible(v: boolean): void {
