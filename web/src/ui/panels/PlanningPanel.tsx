@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { Infrastructure, LonLat, Meta, RoadStatus, ScenarioPlan, Shipment, Statics } from "../../api/types";
+import type { Infrastructure, LonLat, Meta, RoadStatus, ScenarioPlan, Shipment, Statics, Unmet } from "../../api/types";
 import { clearHighlight, flyToPath, flyToPoint, highlightPath, highlightPoint } from "../../globe/controller";
 import { areaCentroid } from "../../globe/geo";
 import { t } from "../../i18n/t";
@@ -294,16 +294,26 @@ function buildItems(
       layers: ["storm", "wind"],
     });
   }
-  // Critical road blocks
-  for (const r of plan.road_status.filter((x: RoadStatus) => x.is_critical)) {
+  // Critical road blocks, one line for each critical link
+  const blocks = new Map<string, RoadStatus[]>();
+  for (const r of plan.road_status) {
+    if (!r.is_critical) continue;
+    const k = r.critical_name ?? r.edge_id;
+    blocks.set(k, [...(blocks.get(k) ?? []), r]);
+  }
+  for (const [name, list] of blocks) {
+    list.sort((a, b) => ms(a.blocked_t) - ms(b.blocked_t));
+    const r = list[0];
+    const reopen = list.map((x) => ms(x.reopen_t)).filter(Number.isFinite);
+    const detail = reopen.length === list.length
+      ? t("plan.item.blockedDetail", { cause: t(`plan.cause.${r.cause}`), t: fmtIso(new Date(Math.max(...reopen)).toISOString()) })
+      : t("plan.item.blockedNever", { cause: t(`plan.cause.${r.cause}`) });
     out.push({
-      id: `road:${r.edge_id}`,
+      id: `road:${name}`,
       who: "both",
       tMs: ms(r.blocked_t),
-      title: t("plan.item.blocked", { name: r.critical_name ?? r.edge_id }),
-      detail: r.reopen_t
-        ? t("plan.item.blockedDetail", { cause: t(`plan.cause.${r.cause}`), t: fmtIso(r.reopen_t) })
-        : t("plan.item.blockedNever", { cause: t(`plan.cause.${r.cause}`) }),
+      title: t("plan.item.blocked", { name }),
+      detail: list.length > 1 ? `${detail} ${t("plan.item.segments", { n: list.length })}` : detail,
       late: false,
       info: false,
       path: r.path,
@@ -311,22 +321,25 @@ function buildItems(
       layers: ["roads", "debris"],
     });
   }
-  // Unmet demand
-  for (const u of plan.unmet) {
+  // Unmet demand, one line for each site
+  const unmet = new Map<string, Unmet[]>();
+  for (const u of plan.unmet) unmet.set(u.site_id, [...(unmet.get(u.site_id) ?? []), u]);
+  for (const [siteId, list] of unmet) {
+    list.sort((a, b) => ms(a.window_start) - ms(b.window_start));
+    const q: Record<string, number> = {};
+    for (const u of list) q[u.commodity] = (q[u.commodity] ?? 0) + u.qty;
+    const s = statics?.shelters.find((x) => x.id === siteId) ?? statics?.hospitals.find((x) => x.id === siteId);
     out.push({
-      id: `unmet:${u.site_id}|${u.window_start}|${u.commodity}`,
+      id: `unmet:${siteId}`,
       who: "supply",
-      tMs: ms(u.window_start),
-      title: t("plan.item.unmet", { site: siteName(u.site_id) }),
-      detail: t("plan.item.unmetDetail", { qty: fmtNum(u.qty), unit: u.unit, item: t(`commodity.${u.commodity}`), t: fmtIso(u.window_start) }),
+      tMs: ms(list[0].window_start),
+      title: t("plan.item.unmet", { site: siteName(siteId) }),
+      detail: t("plan.item.unmetDetail", { n: list.length, t: fmtIso(list[0].window_start) }) + " " + qtyText(q, unitOf),
       late: true,
       info: false,
       path: null,
-      point: (() => {
-        const s = statics?.shelters.find((x) => x.id === u.site_id) ?? statics?.hospitals.find((x) => x.id === u.site_id);
-        return s ? [s.lon, s.lat] : null;
-      })(),
-      layers: ["supply", "shelters"],
+      point: s ? [s.lon, s.lat] : null,
+      layers: ["supply", "shelters", "hospitals"],
     });
   }
   return out.filter((i) => Number.isFinite(i.tMs)).sort((a, b) => a.tMs - b.tMs || Number(a.info) - Number(b.info));

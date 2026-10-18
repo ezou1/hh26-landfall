@@ -343,7 +343,8 @@
       "blockedDetail": "Cause: {cause}. Open again {t}.",
       "blockedNever": "Cause: {cause}. No reopen time in this scenario.",
       "unmet": "Unmet demand at {site}",
-      "unmetDetail": "{qty} {unit} of {item} short in the window from {t}."
+      "unmetDetail": "Short in {n} windows. First window from {t}.",
+      "segments": "({n} segments)"
     },
     "cause": {
       "tree": "trees",
